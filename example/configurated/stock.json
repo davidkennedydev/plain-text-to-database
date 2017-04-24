@@ -1,0 +1,39 @@
+{
+  "endDelimiter" : "\r\n",
+  {
+    "name" : "id",
+    "startPosition" : 0,
+    "length" : 8
+  },
+  {
+    "name" : "model",
+    "startPosition" : 9,
+    "length" : 20
+  },
+  {
+    "name" : "year",
+    "startPosition" : 30,
+    "length" : 4
+  },
+  {
+    "name" : "price",
+    "startPosition" : 35,
+    "length" : 10
+  },
+  {
+    "name" : "last owners",
+    "startPosition" : 46,
+    {
+      {
+        "name" : "name",
+        "startPosition" : 0,
+        "length" : 40
+      },
+      {
+        "name" : "address",
+        "startPosition" : 41,
+        "length" : 80
+      }
+    }
+  }
+}
