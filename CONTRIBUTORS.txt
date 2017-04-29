@@ -1,0 +1,4 @@
+This file contains a list of people who contribute with Plain Text To Database.
+
+Original Plain Text To Database desing and implementation:
+  David Kennedy Araujo <daviduser@me.com>
