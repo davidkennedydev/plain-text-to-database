@@ -21,6 +21,9 @@ inline std::unique_ptr<BuilderDocument> BuildBson(Region &record_description,
             Chars raw_data, size_t position = 0,
             BuilderDocument* document = new BuilderDocument()) {
   for (Region region : record_description.regions) {
+    if (region.position > 0)
+      position = region.position - 1;
+
     if (region.regions.size() == 0) {
       Chars begin = raw_data + position;
       Chars end = begin + region.length;
