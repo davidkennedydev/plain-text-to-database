@@ -1,4 +1,4 @@
-# plain-text-to-database
+# Plain text to Database - P2D
 A library to put plain text data on database.
 
 # Aim
