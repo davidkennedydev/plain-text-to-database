@@ -23,6 +23,10 @@ struct Region {
   Region (string name, size_t length) : 
     name(name), position(0), length(length) {}
 
+  // Construct simple region 
+  // where field name and length are defined.
+  Region (string name, string delimiter) : 
+    name(name), position(0), length(0), end_delimiter(delimiter) {}
 
   // Construct a root region.
   // This region haven't a name and by assumption starts at begin.
@@ -37,6 +41,7 @@ struct Region {
   size_t CalculateLength() {
     if (this->length > 0) return this->length;
 
+    this->length = this->end_delimiter.length();
     for (Region sub_region : this->regions)
       this->length += sub_region.CalculateLength();
 

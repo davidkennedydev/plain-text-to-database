@@ -48,7 +48,7 @@ void Processor::Process(const string file_path, Region& record_description,
   std::vector<bsoncxx::document::value> bulk;
   mongocxx::collection collection = this->database[collection_name];
 
-  while (file.read(raw_entry, record_size + 1)) { // TODO ignore line delimiters
+  while (file.read(raw_entry, record_size)) { // TODO ignore line delimiters
     bulk.emplace_back(
       BuildBson(record_description, raw_entry)->extract()
     );

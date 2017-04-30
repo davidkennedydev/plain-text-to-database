@@ -8,6 +8,7 @@ int main(void) {
     { "name", 1, 10 },
     { "age", 2 },
   };
+  person.end_delimiter = "\n";
 
   Processor::kBulkSize = 3;
 
