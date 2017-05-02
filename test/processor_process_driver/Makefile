@@ -1,17 +1,28 @@
 SRC=../../src
 
-CXX=c++
-CXXFLAGS=--std=c++11 -I $(SRC) -g
-LIBS=$$(pkg-config --cflags --libs libmongocxx) -Wl,-rpath /usr/local/lib
+CXX = g++
+FLAGS = -std=c++1y -I $(SRC) -g
+LIBRARY_PATH = /usr/local/lib
+LIBRARIES = $$(pkg-config --cflags --libs libmongocxx) -Wl,-rpath $(LIBRARY_PATH)
 
-all:
+BIN_PATH = bin
+DRIVERS := $(shell ls *.cpp)
+RUNABLE := $(patsubst %.cpp, bin/%, $(DRIVERS))
 
-%.out:%.cpp plain_text_to_database.o
-	$(CXX) $(CXXFLAGS) $^ $| $(LIBS) -o $@
+all: $(RUNABLE)
 
-plain_text_to_database.o: $(SRC)/plain_text_to_database/processor.cc
-	$(CXX) $(CXXFLAGS) -c $^ -o $@
+
+$(BIN_PATH):
+	mkdir -p $@
+
+bin/%: %.cpp plain_text_to_database.o | $(BIN_PATH)
+	$(CXX) $(FLAGS) $^ -o $@ $(LIBRARIES)
+
+plain_text_to_database.o: $(SRC)/plain_text_to_database/processor.cc | $(SRC)/plain_text_to_database/region.h
+	$(CXX) $(FLAGS) -c $^ -o $@ 
+
+test: $(RUNABLE)
+	for file in `ls bin/*`; do ./$$file; done
 
 clean:
-	rm -rf *.out *.o
-
+	-@rm -rf $(BIN_PATH) *.o 2> /dev/null || true
