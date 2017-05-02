@@ -15,48 +15,48 @@ Processor::Processor (const string connection_string) :
   database = client[uri.database()];
 }
 
-using BuilderDocument = bsoncxx::builder::stream::document;
-using Chars = const char * const;
-inline std::unique_ptr<BuilderDocument> BuildBson(Region &record_description, 
-            Chars raw_data, size_t position = 0,
-            BuilderDocument* document = new BuilderDocument()) {
+using namespace bsoncxx::builder::stream;
+
+inline std::unique_ptr<document> BuildBson(Region &record_description, 
+            std::istream &stream,
+            document* bson = new document()) {
+  size_t begin = stream.tellg();
   for (Region region : record_description.regions) {
     if (region.position > 0)
-      position = region.position - 1;
+      stream.seekg(begin + region.position - 1);
 
-    if (region.regions.size() == 0) {
-      Chars begin = raw_data + position;
-      Chars end = begin + region.length;
-      position += region.length;
-      *document << region.name << std::string(begin, end);
-    } else {
-      *document << region.name << bsoncxx::builder::stream::open_document;
-      BuildBson(record_description, raw_data, position, document);
-      *document << bsoncxx::builder::stream::close_document;
+    if (region.regions.size() > 0) {
+      *bson << region.name << open_document;
+      BuildBson(record_description, stream, bson);
+      *bson << close_document;
+    } else if (region.length > 0) {
+      std::string value;
+      stream.width(region.length), stream >> value;
+      *bson << region.name << value;
     }
   }
+  stream.seekg(begin + record_description.length);
 
-  return std::unique_ptr<BuilderDocument>(document);
+  return stream.good() ? std::unique_ptr<document>(bson) : nullptr;
 }
 
 void Processor::Process(const string file_path, Region& record_description, 
                         const string collection_name) {
-  const size_t record_size = record_description.CalculateLength();
-
   std::ifstream file(file_path);
-  char raw_entry[record_size];
   std::vector<bsoncxx::document::value> bulk;
   mongocxx::collection collection = this->database[collection_name];
 
-  while (file.read(raw_entry, record_size)) { // TODO ignore line delimiters
-    bulk.emplace_back(
-      BuildBson(record_description, raw_entry)->extract()
-    );
+  record_description.CalculateLength();
+
+  while ( auto bson = BuildBson(record_description, file) ) {
+    bulk.emplace_back(bson->extract());
 
     if (bulk.size() >= kBulkSize)
       collection.insert_many(bulk), bulk.clear();
   }
-  collection.insert_many(bulk), bulk.clear();
+  
+  if (bulk.empty() == false)
+    collection.insert_many(bulk), bulk.clear();
 }
 
 } /* PlainTextToDatabase */ 

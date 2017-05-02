@@ -38,14 +38,16 @@ struct Region {
   Region (string name, unsigned position, initializer_list<Region> regions) : 
     name(name), position(position), regions(regions) {}
 
-  size_t CalculateLength() {
-    if (this->length > 0) return this->length;
+  bool CalculateLength() {
+    if (this->length > 0) return true;
 
     this->length = this->end_delimiter.length();
-    for (Region sub_region : this->regions)
-      this->length += sub_region.CalculateLength();
-
-    return this->length;
+    for (Region sub_region : this->regions) {
+      if (sub_region.CalculateLength() == false)
+        return false;
+      this->length += sub_region.length;
+    }
+    return true;
   }
 
   string name;
