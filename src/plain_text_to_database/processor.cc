@@ -29,9 +29,13 @@ inline std::unique_ptr<document> BuildBson(Region &record_description,
       *bson << region.name << open_document;
       BuildBson(record_description, stream, bson);
       *bson << close_document;
-    } else if (region.length > 0) {
+    } else {
       std::string value;
-      stream.width(region.length), stream >> value;
+
+      char data[region.length];
+      stream.read(data, region.length);
+      value = std::string(data, data + region.length);
+
       *bson << region.name << value;
     }
   }
