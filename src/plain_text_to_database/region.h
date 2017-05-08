@@ -1,18 +1,17 @@
 #pragma once
 
 #include <initializer_list>
-using std::initializer_list;
-
-#include <list>
-using std::list;
-
+#include <vector>
+#include <algorithm>
 #include <string>
+
 using std::string;
 
 namespace PlainTextToDatabase {
 
 // Represent a region on positional file.
 struct Region {
+
   // Construct simple region 
   // where field name, start position and length are defined.
   Region (string name, size_t position, size_t length) : 
@@ -30,32 +29,57 @@ struct Region {
 
   // Construct a root region.
   // This region haven't a name and by assumption starts at begin.
-  Region (std::initializer_list<Region> regions) : 
-    name(""), position(0), regions(regions) {}
+  Region (const std::initializer_list<Region> regions) : 
+    Region("", 0, regions) {}
 
   // Construct a region defined by subregions.
   // This region have subregions that define his structure.
-  Region (string name, unsigned position, initializer_list<Region> regions) : 
-    name(name), position(position), regions(regions) {}
+  Region (string name, unsigned position, const std::initializer_list<Region> regions) : 
+    name(name), position(position), regions(regions) {
+    if (this->regions.front().position == 0)
+      this->regions.front().position = 1;
+    for (std::vector<Region>::iterator it = this->regions.begin() + 1; 
+        it != this->regions.end(); ++it) {
+      if (it->position == 0)
+        it->position = (it - 1)->position + (it - 1)->length;
+    }
+    std::sort(this->regions.begin(), this->regions.end());
+    for (std::vector<Region>::const_iterator it = this->regions.begin(); 
+        (it + 1) != this->regions.end(); ++it) {
+      const int gap = (it + 1)->position - (it->position + it->length);
+      if (gap > 0) {
+        it = this->regions.insert(it + 1, gap);
+      }
+    }
+  }
 
   bool CalculateLength() {
     if (this->length > 0) return true;
 
-    this->length = this->end_delimiter.length();
-    for (Region sub_region : this->regions) {
+    for (Region& sub_region : this->regions) {
       if (sub_region.CalculateLength() == false)
         return false;
       this->length += sub_region.length;
     }
+    this->length = this->length == 0 ? 0 : this->end_delimiter.length();
     return true;
   }
 
   string name;
   size_t position, length = 0;
 
-  list<Region> regions;
+  std::vector<Region> regions;
 
   string end_delimiter;
+
+  bool ignore = false;
+
+  bool operator<(Region region) const {
+    return this->position < region.position;
+  }
+
+private:
+  Region (const int length) : length(static_cast<size_t>(length)), ignore(true) {}
 };
 
 } /* PlainTextToDatabase */ 
