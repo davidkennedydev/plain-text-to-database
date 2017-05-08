@@ -23,9 +23,14 @@ struct Region {
     name(name), position(0), length(length) {}
 
   // Construct simple region 
-  // where field name and length are defined.
+  // where field name and delimiter are defined.
   Region (string name, string delimiter) : 
     name(name), position(0), length(0), end_delimiter(delimiter) {}
+
+  // Construct simple region 
+  // where field name and delimiter are defined.
+  Region (string name, size_t position, string delimiter) : 
+    name(name), position(position), length(0), end_delimiter(delimiter) {}
 
   // Construct a root region.
   // This region haven't a name and by assumption starts at begin.
@@ -36,6 +41,12 @@ struct Region {
   // This region have subregions that define his structure.
   Region (string name, unsigned position, const std::initializer_list<Region> regions) : 
     name(name), position(position), regions(regions) {
+    this->CalculatePositions();
+    std::sort(this->regions.begin(), this->regions.end());
+    this->CalculateFixedLength();
+  }
+
+  void CalculatePositions() {
     if (this->regions.front().position == 0)
       this->regions.front().position = 1;
     for (std::vector<Region>::iterator it = this->regions.begin() + 1; 
@@ -43,26 +54,15 @@ struct Region {
       if (it->position == 0)
         it->position = (it - 1)->position + (it - 1)->length;
     }
-    std::sort(this->regions.begin(), this->regions.end());
-    for (std::vector<Region>::const_iterator it = this->regions.begin(); 
-        (it + 1) != this->regions.end(); ++it) {
-      const int gap = (it + 1)->position - (it->position + it->length);
-      if (gap > 0) {
-        it = this->regions.insert(it + 1, gap);
-      }
-    }
   }
 
-  bool CalculateLength() {
-    if (this->length > 0) return true;
-
+  void CalculateFixedLength() {
+    if (this->length > 0) return;
     for (Region& sub_region : this->regions) {
-      if (sub_region.CalculateLength() == false)
-        return false;
+      sub_region.CalculateFixedLength();
       this->length += sub_region.length;
     }
     this->length = this->length == 0 ? 0 : this->end_delimiter.length();
-    return true;
   }
 
   string name;
