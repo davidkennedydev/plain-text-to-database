@@ -5,15 +5,24 @@ using namespace PlainTextToDatabase;
 
 int main(void) {
   Region person {
-    { "name", 1, 10 },
-    { "age", 2 },
+    // name,    position,   length
+    { "name",   1,          10    },    
+
+    // name,    length
+    { "gender", 1     },    
+
+    // name,    position,   delimiter
+    { "city",   14,         "@@"     },    
+  
+    // name,    position,   length
+    { "age",    25,         2     }     
   };
-  person.end_delimiter = "\n";
+  person.end_delimiter = "\n"; // define delimiter for each record
 
   Processor::kBulkSize = 3;
 
   Processor processor("mongodb://test:test@localhost/testdb");
-  processor.Process("person.txt", person, "process_mixed_description");
+  processor.Process("person2.txt", person, "process_mixed_description");
   
   // TODO: make assertions.
   

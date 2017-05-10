@@ -33,7 +33,6 @@ inline std::string Read(std::istream &stream, const size_t length) {
   return std::string(data, data + length);
 }
 
-
 using namespace bsoncxx::builder::stream;
 using DocumentPointer = std::unique_ptr<document>;
 
@@ -42,7 +41,8 @@ inline std::unique_ptr<document> BuildBson(Region &record_description,
             document* bson = new document()) {
   const size_t begin = stream.tellg();
   for (Region& region : record_description.regions) {
-    const size_t current_record_position = static_cast<size_t>(stream.tellg()) - begin + 1;
+    const size_t current_record_position = static_cast<size_t>(stream.tellg()) 
+      - begin + 1;
     stream.ignore(region.position - current_record_position);
     if (stream.eof()) break;
 

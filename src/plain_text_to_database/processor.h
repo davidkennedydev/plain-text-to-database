@@ -1,7 +1,7 @@
+#pragma once
+
 #include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
-
-#pragma once
 
 #include <string>
 using std::string;

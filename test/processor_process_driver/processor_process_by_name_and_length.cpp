@@ -1,9 +1,9 @@
 #include "plain_text_to_database/processor.h"
-using namespace PlainTextToDatabase;
-
 #include <iostream>
 
 int main(void) {
+  using namespace PlainTextToDatabase;
+
   Region person {
     { "name", 10 },
     { "age", 2 }
