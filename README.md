@@ -20,6 +20,9 @@ A library to put plain text data on database.
 - [ ] Put data on memory structures.
 - [ ] Direct integration with table discover software (like Tabula) to get layout of file.
 - [ ] Discover desired layout of file using AI and sugest.
+- [ ] Describe a layout with repeated subregions.
+- [ ] Describe a layout starting with. (like end with delimitator).
+- [ ] Process subregions to diferent database entities (collections, tables, ...)
 
 ## Performace and Availability
 
