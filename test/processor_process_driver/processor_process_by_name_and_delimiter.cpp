@@ -40,8 +40,8 @@ int main(void) {
 
   collection.drop();
 
-  Processor processor(connection_string);
-  processor.Process("personCSV.txt", person, collection_name);
+  Processor processor(connection_string, person);
+  processor.Process("personCSV.txt", collection_name);
 
   cursor cursor = collection.find(document{} << finalize);
   Registry entries[4] {

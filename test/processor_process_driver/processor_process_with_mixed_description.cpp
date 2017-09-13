@@ -21,8 +21,8 @@ int main(void) {
 
   Processor::kBulkSize = 3;
 
-  Processor processor("mongodb://test:test@localhost/testdb");
-  processor.Process("person2.txt", person, "process_mixed_description");
+  Processor processor("mongodb://test:test@localhost/testdb", person);
+  processor.Process("person2.txt", "process_mixed_description");
   
   // TODO: make assertions.
   

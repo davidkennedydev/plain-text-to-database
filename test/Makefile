@@ -3,7 +3,7 @@ SRC=../src
 CXX = g++
 FLAGS = -std=c++1y -I $(SRC) -g
 LIBRARY_PATH = /usr/local/lib
-LIBRARIES = $$(pkg-config --cflags --libs libmongocxx) -Wl,-rpath $(LIBRARY_PATH)
+LIBRARIES = $$(PKG_CONFIG_PATH="/usr/local/lib/pkgconfig" pkg-config --cflags --libs libmongocxx) -Wl,-rpath $(LIBRARY_PATH)
 
 BIN_PATH = bin
 DRIVERS := $(shell ls *.cpp)

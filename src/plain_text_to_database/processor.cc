@@ -9,9 +9,10 @@ namespace PlainTextToDatabase {
 mongocxx::instance instance;
 size_t Processor::kBulkSize = 1;
 
-Processor::Processor (const string connection_string) : 
+Processor::Processor (const string connection_string, Region& record_description) : 
     uri(connection_string),
-    client(uri) {
+    client(uri),
+    record_description(record_description) {
   database = client[uri.database()];
 }
 
@@ -61,13 +62,12 @@ inline std::unique_ptr<document> BuildBson(Region &record_description,
   return stream.good() ? std::unique_ptr<document>(bson) : nullptr;
 }
 
-void Processor::Process(const string file_path, Region& record_description, 
-                        const string collection_name) {
+void Processor::Process(const string file_path, const string collection_name) {
   std::ifstream file(file_path);
   std::vector<bsoncxx::document::value> bulk;
   mongocxx::collection collection = this->database[collection_name];
 
-  while ( DocumentPointer bson = BuildBson(record_description, file) ) {
+  while ( DocumentPointer bson = BuildBson(this->record_description, file) ) {
     bulk.emplace_back(bson->extract());
 
     if (bulk.size() >= kBulkSize)

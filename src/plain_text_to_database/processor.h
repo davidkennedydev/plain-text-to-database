@@ -12,13 +12,13 @@ namespace PlainTextToDatabase {
 
 class Processor {
   public:
-    Processor (const string connection_string);
+    Processor (const string connection_string, Region& layout);
 
     // Process the text file and put data on database.
     //
     // Process the file on file_path based on record_description structure and
     // save the data on database collection collection_name.
-    void Process(const string file_path, Region& record_description, 
+    void Process(const string file_path, 
                  const string collection_name);
 
     static size_t kBulkSize;
@@ -27,6 +27,8 @@ class Processor {
     mongocxx::uri uri;
     mongocxx::client client;
     mongocxx::database database;
+
+    Region& record_description;
 };
 
 } /* PlainTextToDatabase */ 

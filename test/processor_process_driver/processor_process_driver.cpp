@@ -24,12 +24,12 @@ struct Person {
 int main(void) {
   // Define the file layout.
   Region person {
+    // name,    position,   delimiter
+    { "city",   14,         "@@" }, // consider a gap of 2 positions
     // name,    position,   length
     { "name",   1,          10   }, // positions one-based (file start by one)
     // name,    length
     { "gender", 1     },            // continue reading based on last position
-    // name,    position,   delimiter
-    { "city",   14,         "@@" }, // consider a gap of 2 positions
     // name,    position,   length
     { "age",    25,         2    }  // consider a variable gap
   };
@@ -42,7 +42,7 @@ int main(void) {
   std::string collection_name = "process_mixed_description";
 
   // create a processor
-  Processor processor(connection_string);
+  Processor processor(connection_string, person);
 
   using namespace mongocxx; 
   using namespace bsoncxx::builder::stream;
@@ -55,7 +55,7 @@ int main(void) {
   collection.drop();
 
   std::cout << "Testing read empty file...";
-  processor.Process("empty.txt", person, collection_name);
+  processor.Process("empty.txt", collection_name);
 
   // Get all documents on collection.
   cursor result = collection.find(document{} << finalize);
@@ -66,7 +66,7 @@ int main(void) {
 
   std::cout << "Test read a file with many field format definitions..." << std::endl;
   
-  processor.Process("persons.txt", person, collection_name);
+  processor.Process("persons.txt", collection_name);
 
   // Expected entries on file.
   Person entries[] {

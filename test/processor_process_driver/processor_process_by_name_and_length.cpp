@@ -12,8 +12,8 @@ int main(void) {
 
   Processor::kBulkSize = 3;
 
-  Processor processor("mongodb://test:test@localhost/testdb");
-  processor.Process("person.txt", person,
+  Processor processor("mongodb://test:test@localhost/testdb", person);
+  processor.Process("person.txt", 
       "processor_process_by_name_and_length");
 
   // TODO: make assertions.
