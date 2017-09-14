@@ -48,6 +48,7 @@ class ConfigurableProcessor {
       region_name(region_name) {}
 
     ConfigurableProcessor& ExtractFrom(string name, Region& record_description);
+    ConfigurableProcessor& ExtractFrom(string name, std::map<string, Region>& record_descriptions);
 
     // Process file based on previous configuration
     void Process(string file_path);
@@ -56,7 +57,8 @@ class ConfigurableProcessor {
     const Processor& processor;
     string region_name;
 
-    std::vector<std::pair<string, Region&>> extractions;
+    std::map<string, Region> extractions;
+    std::map<string, std::map<string, Region>> extractions_value_dependent;
 };
 
 } /* PlainTextToDatabase */ 

@@ -87,7 +87,12 @@ ConfigurableProcessor Processor::GroupBy(string name) {
 }
 
 ConfigurableProcessor& ConfigurableProcessor::ExtractFrom(string name, Region& record_description) {
-  this->extractions.emplace_back(name, record_description);
+  this->extractions.emplace(name, record_description);
+  return *this;
+}
+
+ConfigurableProcessor& ConfigurableProcessor::ExtractFrom(string name, std::map<string, Region>& record_descriptions) {
+  this->extractions_value_dependent.emplace(name, record_descriptions);
   return *this;
 }
 
@@ -100,8 +105,17 @@ void ConfigurableProcessor::Process(string file_path) {
 
     for (auto& extraction : this->extractions) {
       std::stringstream value_stream(bson->view()[extraction.first].get_utf8().value.to_string());
+      
       *bson << extraction.first << open_document;
       auto document = BuildBson(extraction.second, value_stream, bson.get());
+      *bson << close_document;
+    }
+
+    for (auto& extraction : this->extractions_value_dependent) {
+      std::stringstream value_stream(bson->view()[extraction.first].get_utf8().value.to_string());
+      
+      *bson << extraction.first << open_document;
+      auto document = BuildBson(extraction.second.at(collection_name), value_stream, bson.get());
       *bson << close_document;
     }
 

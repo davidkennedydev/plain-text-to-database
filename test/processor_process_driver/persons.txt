@@ -1,4 +1,4 @@
 David     m* Gyn@@      24 Rua Cesario Alvin, 55..
-Jorge     m* RJ@@       27 Rua do Jorge, 123..
-Adriano   m* RJ@@       32 Rua do Adriano, 456..
-Flavio    m* RJ@@       32 Rua do Flavio, 789..
+Jorge     m* RJ@@       27 Rua do Jorge, 123, Norte..
+Adriano   m* RJ@@       32 Rua do Adriano, 456, Sudoeste..
+Flavio    m* RJ@@       32 Rua do Flavio, 789, Oeste..

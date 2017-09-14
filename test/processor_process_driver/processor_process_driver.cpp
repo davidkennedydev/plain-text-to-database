@@ -137,6 +137,35 @@ int main(void) {
     collection.drop();
   }
 
+  std::cout << "\tTesting group by city and extract diferent adresses...\n";
+  std::map<string, Region> address_description_mixed {
+    { "Gyn",
+      {
+        {"street", ","},
+        {"number", "."}
+      }
+    }, 
+    { "RJ",
+      {
+        {"street", ","},
+        {"number", ","},
+        {"zone", "."}
+      }
+    }
+  };
+
+  processor.GroupBy("city").ExtractFrom("address", address_description_mixed).Process("persons.txt");
+
+  for (auto collection_name : {"Gyn", "RJ"}) {
+    std::cout << "\tOn collection " << collection_name << std::endl;
+    collection = db[collection_name];
+    result = collection.find(document{} << finalize);
+    for (auto & document : result) {
+      std::cout << "\t\tDocument: " << bsoncxx::to_json(document) << std::endl;
+    }
+    collection.drop();
+  }
+
   std::cout << "done." << std::endl;
 
   return 0;
