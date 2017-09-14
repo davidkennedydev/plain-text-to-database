@@ -54,7 +54,7 @@ int main(void) {
 
   collection.drop();
 
-  std::cout << "Testing read empty file...";
+  std::cout << "Testing read empty file...\n";
   processor.Process("empty.txt", collection_name);
 
   // Get all documents on collection.
@@ -64,7 +64,7 @@ int main(void) {
   assert( result_size == 0 );
   std::cout << "ok." << std::endl;
 
-  std::cout << "Test read a file with many field format definitions..." << std::endl;
+  std::cout << "Test read a file with many field format definitions...\n";
   
   processor.Process("persons.txt", collection_name);
 
@@ -75,13 +75,13 @@ int main(void) {
     {"Adriano   ", "m", "RJ" , "32" },
     {"Flavio    ", "m", "RJ" , "32" }
   };
+
   size_t entries_size = (sizeof entries / sizeof(Person));
 
   // Get all documents on collection.
   result = collection.find(document{} << finalize);
-  //result_size = std::distance(result.begin(), result.end());
-
-  //assert(entries_size == result_size);
+  result_size = collection.count(document{} << finalize);
+  assert(entries_size == result_size);
 
   size_t i = 0;
   for (const bsoncxx::document::view & document : result) {
@@ -100,7 +100,23 @@ int main(void) {
     std::cout << "ok." << std::endl << std::endl;
     ++i;
   }
+
+  collection.drop();
+
+  std::cout << "\tTesting group by address...\n";
+  processor.GroupBy("city").Process("persons.txt");
+
+  for (auto collection_name : {"Gyn", "RJ"}) {
+    std::cout << "\tOn collection " << collection_name << std::endl;
+    collection = db[collection_name];
+    result = collection.find(document{} << finalize);
+    for (auto & document : result) {
+      std::cout << "\t\tDocument: " << bsoncxx::to_json(document) << std::endl;
+    }
+    collection.drop();
+  }
+
   std::cout << "done." << std::endl;
-  
+
   return 0;
 }

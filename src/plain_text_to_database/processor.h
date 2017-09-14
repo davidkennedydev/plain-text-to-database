@@ -10,9 +10,13 @@ using std::string;
 
 namespace PlainTextToDatabase {
 
+class ConfigurableProcessor;
+
 class Processor {
+  friend class ConfigurableProcessor;
   public:
-    Processor (const string connection_string, Region& layout);
+
+    Processor(const string connection_string, Region& record_description);
 
     // Process the text file and put data on database.
     //
@@ -20,6 +24,11 @@ class Processor {
     // save the data on database collection collection_name.
     void Process(const string file_path, 
                  const string collection_name);
+
+    // Configure extraction grouping entries by region name
+    //
+    // The default collection name is the value on grouped subregion
+    ConfigurableProcessor GroupBy(string name);
 
     static size_t kBulkSize;
 
@@ -29,6 +38,21 @@ class Processor {
     mongocxx::database database;
 
     Region& record_description;
+};
+
+class ConfigurableProcessor {
+  public:
+    ConfigurableProcessor(const Processor& processor,
+                          const string region_name) :
+      processor(processor),
+      region_name(region_name) {}
+
+    // Process file based on previous configuration
+    void Process(string file_path);
+
+  private:
+    const Processor& processor;
+    string region_name;
 };
 
 } /* PlainTextToDatabase */ 

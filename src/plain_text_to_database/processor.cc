@@ -4,6 +4,8 @@
 #include <bsoncxx/json.hpp>
 #include <vector>
 
+#include <map>
+
 namespace PlainTextToDatabase {
 
 mongocxx::instance instance;
@@ -76,6 +78,28 @@ void Processor::Process(const string file_path, const string collection_name) {
   
   if (bulk.empty() == false)
     collection.insert_many(bulk), bulk.clear();
+}
+
+ConfigurableProcessor Processor::GroupBy(string name) {
+  return ConfigurableProcessor(*this, name);
+}
+
+void ConfigurableProcessor::Process(string file_path) {
+  std::ifstream file(file_path);
+  std::map<string, std::vector<bsoncxx::document::value>> bulks;
+
+  while ( DocumentPointer bson = BuildBson(processor.record_description, file) ) {
+    string collection_name(bson->view()[this->region_name].get_utf8().value);
+
+    bulks[collection_name].emplace_back(bson->extract());
+
+    if (bulks[collection_name].size() >= processor.kBulkSize)
+      processor.database[collection_name].insert_many(bulks[collection_name]), bulks[collection_name].clear();
+  }
+
+  for (auto bulk : bulks)
+    if (bulk.second.empty() == false)
+      processor.database[bulk.first].insert_many(bulk.second);
 }
 
 } /* PlainTextToDatabase */ 
