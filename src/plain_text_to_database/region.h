@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <string>
 
+#include <functional>
+
 using std::string;
 
 namespace PlainTextToDatabase {
@@ -72,14 +74,15 @@ struct Region {
 
   string end_delimiter;
 
-  bool ignore = false;
+  bool ignore = false; // TODO Remove ignore if not used
 
   bool operator<(Region region) const {
     return this->position < region.position;
   }
 
 private:
-  Region (const int length) : length(static_cast<size_t>(length)), ignore(true) {}
+  Region (const int length) : length(static_cast<size_t>(length)), ignore(true) {} // TODO Remove if not used
+
 };
 
 } /* PlainTextToDatabase */ 

@@ -31,7 +31,9 @@ int main(void) {
     // name,    length
     { "gender", 1     },            // continue reading based on last position
     // name,    position,   length
-    { "age",    25,         2    }  // consider a variable gap
+    { "age",    25,         2    },  // consider a variable gap
+    // name,    position,   delimiter
+    { "address", "." }, // consider a gap of 2 positions
   };
   person.end_delimiter = "\n"; // define delimiter for each record
 
@@ -103,8 +105,27 @@ int main(void) {
 
   collection.drop();
 
-  std::cout << "\tTesting group by address...\n";
+  std::cout << "\tTesting group by city...\n";
+
   processor.GroupBy("city").Process("persons.txt");
+
+  for (auto collection_name : {"Gyn", "RJ"}) {
+    std::cout << "\tOn collection " << collection_name << std::endl;
+    collection = db[collection_name];
+    result = collection.find(document{} << finalize);
+    for (auto & document : result) {
+      std::cout << "\t\tDocument: " << bsoncxx::to_json(document) << std::endl;
+    }
+    collection.drop();
+  }
+
+  std::cout << "\tTesting group by city and extract adress...\n";
+  Region address_description {
+    {"street", ","},
+    {"number", "."}
+  };
+
+  processor.GroupBy("city").ExtractFrom("address", address_description).Process("persons.txt");
 
   for (auto collection_name : {"Gyn", "RJ"}) {
     std::cout << "\tOn collection " << collection_name << std::endl;

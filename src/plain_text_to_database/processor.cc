@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <map>
+#include <sstream>
 
 namespace PlainTextToDatabase {
 
@@ -53,10 +54,11 @@ inline std::unique_ptr<document> BuildBson(Region &record_description,
       *bson << region.name << open_document;
       BuildBson(record_description, stream, bson);
       *bson << close_document;
-    } else if (region.length > 0)
-      *bson << region.name << Read(stream, region.length);
-    else
-      *bson << region.name << GetUntil(stream, region.end_delimiter);
+    } else
+      *bson << region.name 
+            << (region.length > 0? 
+              Read(stream, region.length) :
+              GetUntil(stream, region.end_delimiter));
   }
   if (!record_description.end_delimiter.empty())
      GetUntil(stream, record_description.end_delimiter);
@@ -84,6 +86,11 @@ ConfigurableProcessor Processor::GroupBy(string name) {
   return ConfigurableProcessor(*this, name);
 }
 
+ConfigurableProcessor& ConfigurableProcessor::ExtractFrom(string name, Region& record_description) {
+  this->extractions.emplace_back(name, record_description);
+  return *this;
+}
+
 void ConfigurableProcessor::Process(string file_path) {
   std::ifstream file(file_path);
   std::map<string, std::vector<bsoncxx::document::value>> bulks;
@@ -91,8 +98,14 @@ void ConfigurableProcessor::Process(string file_path) {
   while ( DocumentPointer bson = BuildBson(processor.record_description, file) ) {
     string collection_name(bson->view()[this->region_name].get_utf8().value);
 
-    bulks[collection_name].emplace_back(bson->extract());
+    for (auto& extraction : this->extractions) {
+      std::stringstream value_stream(bson->view()[extraction.first].get_utf8().value.to_string());
+      *bson << extraction.first << open_document;
+      auto document = BuildBson(extraction.second, value_stream, bson.get());
+      *bson << close_document;
+    }
 
+    bulks[collection_name].emplace_back(bson->extract());
     if (bulks[collection_name].size() >= processor.kBulkSize)
       processor.database[collection_name].insert_many(bulks[collection_name]), bulks[collection_name].clear();
   }

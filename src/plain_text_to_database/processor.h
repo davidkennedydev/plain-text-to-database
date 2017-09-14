@@ -47,12 +47,16 @@ class ConfigurableProcessor {
       processor(processor),
       region_name(region_name) {}
 
+    ConfigurableProcessor& ExtractFrom(string name, Region& record_description);
+
     // Process file based on previous configuration
     void Process(string file_path);
 
   private:
     const Processor& processor;
     string region_name;
+
+    std::vector<std::pair<string, Region&>> extractions;
 };
 
 } /* PlainTextToDatabase */ 
