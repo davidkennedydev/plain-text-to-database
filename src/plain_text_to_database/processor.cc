@@ -6,6 +6,7 @@
 
 #include <map>
 #include <sstream>
+#include <memory>
 
 namespace PlainTextToDatabase {
 
@@ -103,20 +104,26 @@ void ConfigurableProcessor::Process(string file_path) {
   while ( DocumentPointer bson = BuildBson(processor.record_description, file) ) {
     string collection_name(bson->view()[this->region_name].get_utf8().value);
 
-    for (auto& extraction : this->extractions) {
-      std::stringstream value_stream(bson->view()[extraction.first].get_utf8().value.to_string());
-      
-      *bson << extraction.first << open_document;
-      auto document = BuildBson(extraction.second, value_stream, bson.get());
-      *bson << close_document;
-    }
+    if (this->extractions.size() + this->extractions_value_dependent.size() > 0) {
+      auto extracted_bson = std::make_unique<document>();
 
-    for (auto& extraction : this->extractions_value_dependent) {
-      std::stringstream value_stream(bson->view()[extraction.first].get_utf8().value.to_string());
-      
-      *bson << extraction.first << open_document;
-      auto document = BuildBson(extraction.second.at(collection_name), value_stream, bson.get());
-      *bson << close_document;
+      for (auto& extraction : this->extractions) {
+        std::stringstream value_stream(bson->view()[extraction.first].get_utf8().value.to_string());
+        
+        *extracted_bson << extraction.first << open_document;
+        auto document = BuildBson(extraction.second, value_stream, extracted_bson.get());
+        *extracted_bson << close_document;
+      }
+
+      for (auto& extraction : this->extractions_value_dependent) {
+        std::stringstream value_stream(bson->view()[extraction.first].get_utf8().value.to_string());
+        
+        *extracted_bson << extraction.first << open_document;
+        auto document = BuildBson(extraction.second.at(collection_name), value_stream, extracted_bson.get());
+        *extracted_bson << close_document;
+      }
+
+      bson.reset(extracted_bson.release());
     }
 
     bulks[collection_name].emplace_back(bson->extract());

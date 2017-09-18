@@ -105,7 +105,7 @@ int main(void) {
 
   collection.drop();
 
-  std::cout << "\tTesting group by city...\n";
+  std::cout << "\n\tTesting group by city...\n";
 
   processor.GroupBy("city").Process("persons.txt");
 
@@ -119,7 +119,7 @@ int main(void) {
     collection.drop();
   }
 
-  std::cout << "\tTesting group by city and extract adress...\n";
+  std::cout << "\n\tTesting group by city and extract adress...\n";
   Region address_description {
     {"street", ","},
     {"number", "."}
@@ -137,7 +137,7 @@ int main(void) {
     collection.drop();
   }
 
-  std::cout << "\tTesting group by city and extract diferent adresses...\n";
+  std::cout << "\n\tTesting group by city and extract diferent adresses...\n";
   std::map<string, Region> address_description_mixed {
     { "Gyn",
       {
