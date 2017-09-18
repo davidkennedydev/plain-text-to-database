@@ -5,8 +5,6 @@ CXX = g++
 DEBUG_FLAGS ?=
 HEADERS = $(SRC)
 FLAGS = -std=c++1y -I $(HEADERS) $(DEBUG_FLAGS)
-LIBRARY_PATH = /usr/local/lib
-LIBRARIES = $$(PKG_CONFIG_PATH="$(LIBRARY_PATH)/pkgconfig" pkg-config --cflags --libs libmongocxx) -Wl,-rpath $(LIBRARY_PATH)
 
 all: $(LIB)/plain_text_to_database.o
 
