@@ -35,34 +35,44 @@ struct Region {
   // Construct a root region.
   // This region haven't a name and by assumption starts at begin.
   Region (const std::initializer_list<Region> regions) : 
-    Region("", 0, regions) {}
+    Region("", regions) {}
+
+  // Construct a root region.
+  // This region haven't a name and by assumption starts at begin.
+  Region (string name, const std::initializer_list<Region> regions) : 
+    Region(name, 0, regions) {}
 
   // Construct a region defined by subregions.
   // This region have subregions that define his structure.
   Region (string name, unsigned position, const std::initializer_list<Region> regions) : 
     name(name), position(position), regions(regions) {
+    this->CalculateFixedLength();
     this->CalculatePositions();
     std::sort(this->regions.begin(), this->regions.end());
-    this->CalculateFixedLength();
   }
 
+  static const size_t kUndefined = 0;
+
   void CalculatePositions() {
-    if (this->regions.front().position == 0)
+    if (this->regions.front().position == kUndefined)
       this->regions.front().position = 1;
     for (std::vector<Region>::iterator it = this->regions.begin() + 1; 
         it != this->regions.end(); ++it) {
-      if (it->position == 0)
+      if (it->position == kUndefined)
         it->position = (it - 1)->position + (it - 1)->length;
     }
   }
 
   void CalculateFixedLength() {
-    if (this->length > 0) return;
+    if (this->length > kUndefined) return;
     for (Region& sub_region : this->regions) {
       sub_region.CalculateFixedLength();
+      if (sub_region.length == kUndefined) {
+        this->length = kUndefined;
+        break;
+      }
       this->length += sub_region.length;
     }
-    this->length = this->length == 0 ? 0 : this->end_delimiter.length();
   }
 
   string name;

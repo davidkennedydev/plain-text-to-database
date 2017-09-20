@@ -36,29 +36,38 @@ inline std::string Read(std::istream &stream, const size_t length) {
 using namespace bsoncxx::builder::stream;
 using DocumentPointer = std::unique_ptr<document>;
 
-inline std::unique_ptr<document> BuildBson(Region &record_description, 
-            std::istream &stream,
-            document* bson = new document()) {
-  const size_t begin = stream.tellg();
-  for (Region& region : record_description.regions) {
-    const size_t current_record_position = static_cast<size_t>(stream.tellg()) 
-      - begin + 1;
-    stream.ignore(region.position - current_record_position);
-    if (stream.eof()) break;
+void RecursiveBuildBson(Region &region, 
+    std::istream &stream,
+    size_t relative_position,
+    document& bson) {
+  const size_t stream_position = static_cast<size_t>(stream.tellg());
+  const size_t current_record_position = stream_position - relative_position;
+  stream.ignore((region.position - 1) - current_record_position);
 
-    if (region.regions.size() > 0) {
-      *bson << region.name << open_document;
-      BuildBson(record_description, stream, bson);
-      *bson << close_document;
-    } else if (region.length > 0)
-      *bson << region.name << Read(stream, region.length);
-    else
-      *bson << region.name << GetUntil(stream, region.end_delimiter);
+  if (region.regions.size() > 0) {
+    bson << region.name << open_document;
+    const size_t stream_subregion_record_position = stream.tellg();
+    for (Region& sub_region : region.regions) {
+      RecursiveBuildBson(sub_region, stream, stream_subregion_record_position, bson);
+    }
+    bson << close_document;
+  } else if (region.length > 0)
+    bson << region.name << Read(stream, region.length);
+  else
+    bson << region.name << GetUntil(stream, region.end_delimiter); 
+}
+
+std::unique_ptr<document> BuildBson(Region &region_description, std::istream &stream) {
+  std::unique_ptr<document> bson( new document{} );
+  const size_t stream_record_start_position = stream.tellg();
+  for (Region& region : region_description.regions) {
+    if (stream.eof())
+      return nullptr;
+    RecursiveBuildBson(region, stream, stream_record_start_position, *bson);
   }
-  if (!record_description.end_delimiter.empty())
-     GetUntil(stream, record_description.end_delimiter);
-
-  return stream.good() ? std::unique_ptr<document>(bson) : nullptr;
+  if (region_description.end_delimiter.empty() == false)
+    GetUntil(stream, region_description.end_delimiter);
+  return bson;
 }
 
 void Processor::Process(const string file_path, Region& record_description, 
