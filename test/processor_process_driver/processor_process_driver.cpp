@@ -6,7 +6,7 @@
 #include <bsoncxx/json.hpp>
 #include <iostream>
 #include <bsoncxx/document/view.hpp>
-#include "plain_text_to_database/processor.h"
+#include "processor.h"
 using namespace PlainTextToDatabase;
 
 #include <iostream>

@@ -3,7 +3,7 @@
 #include <mongocxx/database.hpp>
 #include <mongocxx/collection.hpp>
 #include <bsoncxx/json.hpp>
-#include "plain_text_to_database/processor.h"
+#include "processor.h"
 #include <cassert>
 #include <string>
 using std::string;

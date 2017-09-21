@@ -1,15 +1,15 @@
 SRC=src
 LIB=lib
+INCLUDE=include
 
 CXX = g++
 DEBUG_FLAGS ?=
-HEADERS = $(SRC)
-FLAGS = -std=c++1y -I $(HEADERS) $(DEBUG_FLAGS)
+FLAGS = -std=c++1y -I $(INCLUDE) $(DEBUG_FLAGS)
 
 all: $(LIB)/plain_text_to_database.o
 
 
-$(LIB)/plain_text_to_database.o: $(SRC)/plain_text_to_database/processor.cc $(SRC)/plain_text_to_database/region.h
+$(LIB)/plain_text_to_database.o: $(SRC)/processor.cc $(INCLUDE)/region.h
 	$(CXX) $(FLAGS) -c $< -o $@ 
 
 clean:

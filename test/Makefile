@@ -1,30 +1,31 @@
-SRC=../src
+ROOT=..
+SRC=$(ROOT)/src
+LIB=$(ROOT)/lib
+INCLUDE = $(ROOT)/include
 
 CXX = g++
 DEBUG_FLAGS ?= -g
-HEADERS = $(SRC)
-FLAGS = -std=c++1y -I $(HEADERS) $(DEBUG_FLAGS)
+FLAGS = -std=c++1y -I $(ROOT) $(DEBUG_FLAGS)
 LIBRARY_PATH = /usr/local/lib
-LIBRARIES = $$(pkg-config --cflags --libs libmongocxx) -Wl,-rpath $(LIBRARY_PATH)
+LIBRARIES = $$(PKG_CONFIG_PATH="$(LIBRARY_PATH)/pkgconfig" pkg-config --cflags --libs libmongocxx) -Wl,-rpath $(LIBRARY_PATH)
 
 BIN_PATH = bin
 DRIVERS := $(shell ls *.cpp)
 RUNABLE := $(patsubst %.cpp, bin/%, $(DRIVERS))
 
-all: $(RUNABLE)
+.PHONY: $(LIB)/plain_text_to_database.o 
+
+all: $(RUNABLE) 
 
 
 $(BIN_PATH):
 	mkdir -p $@
 
-bin/build_bson_driver: ./build_bson_driver.cpp | $(BIN_PATH)
-	$(CXX) $(FLAGS) $^ -o $@ $(LIBRARIES)
+$(LIB)/plain_text_to_database.o:
+	cd $(ROOT) && DEBUG_FLAGS="$(DEBUG_FLAGS)" $(MAKE)
 
-bin/%: %.cpp plain_text_to_database.o | $(BIN_PATH)
+bin/%: %.cpp $(LIB)/plain_text_to_database.o | $(BIN_PATH) 
 	$(CXX) $(FLAGS) $^ -o $@ $(LIBRARIES)
-
-plain_text_to_database.o: $(SRC)/plain_text_to_database/processor.cc | $(SRC)/plain_text_to_database/region.h
-	$(CXX) $(FLAGS) -c $^ -o $@ 
 
 test: $(RUNABLE)
 	for file in `ls bin/*`; do ./$$file; done

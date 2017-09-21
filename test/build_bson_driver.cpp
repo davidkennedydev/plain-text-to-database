@@ -1,4 +1,5 @@
-#include "../src/plain_text_to_database/processor.cc"
+#include "include/processor.h"
+#include "src/processor.cc"
 #include <sstream>
 using namespace PlainTextToDatabase;
 

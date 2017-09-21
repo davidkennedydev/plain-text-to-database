@@ -1,11 +1,11 @@
 ROOT=../..
 SRC=$(ROOT)/src
 LIB=$(ROOT)/lib
+INCLUDE = $(ROOT)/include
 
 CXX = g++
 DEBUG_FLAGS ?= -g
-HEADERS = $(SRC)
-FLAGS = -std=c++1y -I $(HEADERS) $(DEBUG_FLAGS)
+FLAGS = -std=c++1y -I $(INCLUDE) $(DEBUG_FLAGS)
 LIBRARY_PATH = /usr/local/lib
 LIBRARIES = $$(PKG_CONFIG_PATH="$(LIBRARY_PATH)/pkgconfig" pkg-config --cflags --libs libmongocxx) -Wl,-rpath $(LIBRARY_PATH)
 
