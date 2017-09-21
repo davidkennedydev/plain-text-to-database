@@ -82,14 +82,10 @@ struct Region {
 
   string end_delimiter;
 
-  bool ignore = false;
-
   bool operator<(Region region) const {
     return this->position < region.position;
   }
 
-private:
-  Region (const int length) : length(static_cast<size_t>(length)), ignore(true) {}
 };
 
 } /* PlainTextToDatabase */ 
