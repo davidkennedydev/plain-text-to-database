@@ -1,7 +1,9 @@
 SRC=../src
 
 CXX = g++
-FLAGS = -std=c++1y -I $(SRC) -g
+DEBUG_FLAGS ?= -g
+HEADERS = $(SRC)
+FLAGS = -std=c++1y -I $(HEADERS) $(DEBUG_FLAGS)
 LIBRARY_PATH = /usr/local/lib
 LIBRARIES = $$(pkg-config --cflags --libs libmongocxx) -Wl,-rpath $(LIBRARY_PATH)
 
