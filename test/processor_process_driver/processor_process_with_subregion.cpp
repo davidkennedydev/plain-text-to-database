@@ -22,16 +22,18 @@ int main(void) {
   const string collection_name = "processor_process_with_subregion";
 
   Region person {
-    { "name", 10 },
-    { "age", 2 },
-    { "address", 
-      {
-        { "street", "," },
-        { "number", 4 }
+    {
+      { "name", 10 },
+      { "age", 2 },
+      { "address", 
+        {
+          { "street", "," },
+          { "number", 4 }
+        }
       }
-    }
+    },
+    "\n"
   };
-  person.end_delimiter = '\n';
 
   Processor::kBulkSize = 3;
 

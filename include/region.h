@@ -34,21 +34,22 @@ struct Region {
 
   // Construct a root region.
   // This region haven't a name and by assumption starts at begin.
-  Region (const std::initializer_list<Region> regions) : 
-    Region("", regions) {}
+  Region (const std::initializer_list<Region> regions, string delimiter = "") : 
+    Region("", regions, delimiter) {}
 
   // Construct a root region.
   // This region haven't a name and by assumption starts at begin.
-  Region (string name, const std::initializer_list<Region> regions) : 
-    Region(name, 0, regions) {}
+  Region (string name, const std::initializer_list<Region> regions, string delimiter = "") : 
+    Region(name, 0, regions, delimiter) {}
 
   // Construct a region defined by subregions.
   // This region have subregions that define his structure.
-  Region (string name, unsigned position, const std::initializer_list<Region> regions) : 
+  Region (string name, unsigned position, const std::initializer_list<Region> regions, string delimiter) : 
     name(name), position(position), regions(regions) {
     this->CalculateFixedLength();
     this->CalculatePositions();
     std::sort(this->regions.begin(), this->regions.end());
+    this->end_delimiter = delimiter;
   }
 
   static const size_t kUndefined = 0;
