@@ -43,4 +43,3 @@ A library to put plain text data on database.
 # Code style
 
 This project use the Google C++ style guide
-
